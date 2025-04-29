@@ -1,0 +1,77 @@
+/* src/styles/CoverPage.css */
+.cover-page {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.laptop-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0; /* Ensure the image is behind other elements */
+}
+
+.cover-box {
+  background-color: rgba(205 224 254 ); /* Light Blue with a lighter shade and slight transparency */
+  border-radius: 40px;
+  padding: 40px;
+  width: 40%;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Aligns content to the top */
+  position: relative;
+  margin-left: 30px; /* Adds padding to the left */
+  margin-top: 160px; /* Adds padding to the top */
+}
+
+.app-name {
+  font-size: 2.5rem;
+  font-weight: bold;
+  font-family: 'Arial', sans-serif; /* Sans Serif */
+  color: black; /* Text color */
+  margin-bottom: 30px;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: auto; /* Pushes buttons to the bottom */
+}
+
+.login-button,
+.coverpage-signup-button {
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  font-family: 'Arial', sans-serif; /* Sans Serif */
+  background-color: #3498db; /* Blue */
+  color: white;
+}
+
+.login-button:hover {
+  background-color: #2980b9;
+  transform: scale(1.05);
+}
+
+.coverpage-signup-button {
+  background-color: #3498db; /* Blue */
+}
+
+.coverpage-signup-button:hover {
+  background-color: #2980b9;
+  transform: scale(1.05);
+}
+
+/* Add styles for icons here */

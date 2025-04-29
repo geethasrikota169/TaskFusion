@@ -1,8 +1,9 @@
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainNavBar from "./main/MainNavBar";
 import AdminNavBar from "./admin/AdminNavBar";
 import UserNavBar from "./user/UserNavBar";
 import ManagerNavBar from "./manager/ManagerNavBar";
+import CoverPage from "./main/CoverPage"; // Import CoverPage
 import { AuthProvider, useAuth } from "./contextapi/AuthContext";
 
 function AppContent() 
@@ -12,15 +13,23 @@ function AppContent()
   return (
     <div>
       <BrowserRouter>
-        {isAdminLoggedIn ? (
-          <AdminNavBar />
-        ) : isUserLoggedIn ? (
-          <UserNavBar />
-        ) : isManagerLoggedIn ? (
-          <ManagerNavBar />
-        ) : (
-          <MainNavBar />
-        )}
+        <Routes>
+          <Route path="/" element={<CoverPage />} /> 
+          <Route
+            path="*"
+            element={
+              isAdminLoggedIn ? (
+                <AdminNavBar />
+              ) : isUserLoggedIn ? (
+                <UserNavBar />
+              ) : isManagerLoggedIn ? (
+                <ManagerNavBar />
+              ) : (
+                <MainNavBar />
+              )
+            }
+          />
+        </Routes>
       </BrowserRouter>
     </div>
   );

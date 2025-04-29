@@ -8,13 +8,16 @@ import Contact from './Contact';
 import AdminLogin from './../admin/AdminLogin';
 import ManagerLogin from '../manager/ManagerLogin';
 import NotFound from './NotFound';
+import logoImage from '../assets/taskfusion-logo.png'; // Import your logo image
 
 export default function MainNavBar() 
 {
   return (
     <div>
       <nav className="navbar">
-        <div className="logo">Event Management System</div>
+        <div className="logo">
+          <img src={logoImage} alt="Task Management System Logo" className="logo-image" />
+        </div>
         <ul className="nav-links">
           <li><Link to="/">Home</Link></li>
           <li><Link to="/about">About</Link></li>

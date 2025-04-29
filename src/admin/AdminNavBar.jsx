@@ -18,7 +18,7 @@ export default function AdminNavBar()
 
   return (
     <div>
-      <nav className="navbar">
+      <nav className="adminnavbar">
         <div className="logo">Welcome Admin</div>
         <ul className="nav-links">
           <li><Link to="/adminhome">Home</Link></li>

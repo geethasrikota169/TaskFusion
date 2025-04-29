@@ -1,0 +1,118 @@
+body, html {
+  height: 100%;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.login-page {
+  width: 100%;
+  height: 89vh;
+  background: linear-gradient(to bottom, #6dd5fa, #dadada); /* Light blue gradient background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-card {
+  background-color: rgb(241, 245, 252); /* Light Blue with a lighter shade */
+  border-radius: 40px;
+  display: flex;
+  overflow: hidden;
+  width: 70%;
+  max-width: 900px;
+  margin-top: 0px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.login-left, .login-right {
+  width: 50%;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+.login-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: black;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.email-input, 
+.password-input {
+  width: 300px;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  background-color: #d4d4d4;
+  color: black;
+}
+
+.login2-button {
+  width: 40%;
+  padding: 12px;
+  margin: 20px 110px;
+  background-color: #3498db; /* Blue button */
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.login2-button:hover {
+  background-color: #2980b9; /* Darker blue on hover */
+}
+
+.signup-message {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #333;
+  text-align: center;
+}
+
+.signup-message a {
+  color: #3498db; /* Blue link */
+  text-decoration: none;
+}
+
+.signup-message a:hover {
+  text-decoration: underline;
+}
+
+.login-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #e4e3e3;
+}
+
+.login-image {
+  max-width: 100%;
+  height: auto;
+}
+
+.login-message {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #333;
+  text-align: center;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #ffeeee;
+  border-radius: 5px;
+}
