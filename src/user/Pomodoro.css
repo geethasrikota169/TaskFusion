@@ -1,0 +1,66 @@
+.pomodoro-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #000000; /* Adjust background color as needed */
+  font-family: Arial, sans-serif;
+  height: 100%; /* Ensure it fills the parent container */
+  margin-top:90px;
+  margin-left:80px;
+  padding : 40px 200px 40px 200px;
+  width:750px;
+}
+
+.pomo-title {
+  font-size: 2rem;
+  margin-bottom: 40px;
+  margin-top:0;
+  color: #ffffff;
+}
+
+.timer-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+}
+
+.timer-display {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.timer-controls {
+  display: flex;
+  gap: 10px;
+  margin-top:20px;
+}
+
+.timer-controls button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.timer-controls button:hover {
+  background-color: #ddd;
+}
+
+.timer-controls button:first-child {
+  background-color: #4caf50;
+  color: white;
+}
+
+.timer-controls button:nth-child(2) {
+  background-color: #f44336;
+  color: white;
+}
