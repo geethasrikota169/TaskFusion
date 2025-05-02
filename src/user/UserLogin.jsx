@@ -14,7 +14,7 @@ export default function UserLogin() {
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
-  const { setIsUserLoggedIn } = useAuth();
+  const { setIsUserLoggedIn, setUserData } = useAuth(); // Added setUserData
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -23,12 +23,26 @@ export default function UserLogin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    
     try {
       const response = await axios.post(`${config.url}/user/checkUserLogin`, formData);
-  
+      console.log('Full response:', response);
+
       if(response.status === 200) {
-        setIsUserLoggedIn(true); 
+        // Store complete user data in context
+        console.log('User data received:', response.data);
+        setUserData({
+          id: response.data.id,
+          username: response.data.username,
+          name: response.data.name,
+          email: response.data.email,
+          gender: response.data.gender,
+          dob: response.data.dob,
+          mobileno: response.data.mobileno,
+          location: response.data.location
+        });
+        
+        setIsUserLoggedIn(true);
         navigate("/userhome");
       } else {
         setError(response.data || "Login failed. Please check credentials.");

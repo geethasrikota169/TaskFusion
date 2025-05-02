@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAuth } from '../contextapi/AuthContext';
 import './UserHome.css'; 
 import Ichecklist from '../assets/icons/Ichecklist.png';
 import Inotes from '../assets/icons/Inotes.png';
@@ -6,6 +7,8 @@ import Itodolist from '../assets/icons/Itodolist.png';
 import Iworkinprogress from '../assets/icons/Iworkinprogress.png';
 
 export default function UserHome() {
+  const { userData } = useAuth(); // Get user data from context
+
   return (
     <div className="user-dashboard">
       <div className="task-stats horizontal">
@@ -40,7 +43,7 @@ export default function UserHome() {
       </div>
 
       <div className="task-graph">
-        <h2>Welcome to User Home</h2>
+        <h2>Welcome, {userData?.name || 'User'}!</h2>
       </div>
     </div>
   );

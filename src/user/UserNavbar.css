@@ -83,7 +83,7 @@
 
 /* Previous styles remain the same */
 
-.profile-container {
+.navbar-profile-container {
   display: flex;
   align-items: center;
   position: relative;

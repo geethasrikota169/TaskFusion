@@ -1,0 +1,115 @@
+.profile-container {
+  max-width: 800px;
+  margin: 100px auto;
+  padding: 20px 30px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-container h2 {
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.profile-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.profile-field {
+  display: flex;
+  margin-bottom: 15px;
+}
+
+.field-label {
+  font-weight: bold;
+  color: #34495e;
+  width: 150px;
+}
+
+.field-value {
+  color: #7f8c8d;
+  flex: 1;
+}
+
+@media (max-width: 600px) {
+  .profile-field {
+    flex-direction: column;
+  }
+  
+  .field-label {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+}
+
+.profile-actions {
+  margin-bottom: 20px;
+  margin-top: 30px;
+  margin-left : 300px;
+}
+
+.edit-btn, .save-btn, .cancel-btn {
+  padding: 8px 16px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.edit-btn {
+  background-color: #3498db;
+  color: white;
+}
+
+.save-btn {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.editable-field {
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 200px;
+}
+
+.error-message {
+  color: #e74c3c;
+  margin-bottom: 15px;
+}
+.success-message {
+  color: #2ecc71;
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #e8f8f0;
+  border-radius: 4px;
+}
+
+.field-error {
+  color: #e74c3c;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  display: block;
+}
+
+.editable-field.error {
+  border-color: #e74c3c;
+}
+/* 
+.editable-field {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 300px;
+  margin-top: 5px;
+} */

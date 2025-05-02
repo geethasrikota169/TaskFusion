@@ -17,11 +17,13 @@ import { TaskProvider } from './TaskContext';
 
 export default function UserNavBar() {
   const { setIsUserLoggedIn } = useAuth();
+  const { clearAuthData } = useAuth();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const handleLogout = () => {
     setIsUserLoggedIn(false);
+    clearAuthData();
     navigate('/userlogin');
   };
 
@@ -37,7 +39,7 @@ export default function UserNavBar() {
         </div>
         <div className="header-right">
           <img src={notificationicon} alt="Notifications" className="notif-icon" />
-          <div className="profile-container">
+          <div className="navbar-profile-container">
             <img 
               src={defaultProfile} 
               alt="Profile" 
@@ -49,8 +51,21 @@ export default function UserNavBar() {
             </button>
             {dropdownOpen && (
               <div className="user-dropdown-menu">
-                <Link to="/profile" className="user-dropdown-item">My Profile</Link>
-                <div className="user-dropdown-item" onClick={handleLogout}>Logout</div>
+                <Link 
+                  to="/userprofile" 
+                  className="user-dropdown-item" 
+                  onClick={() => setDropdownOpen(false)}
+                >
+                  My Profile
+                </Link>
+                <div className="user-dropdown-item" 
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    handleLogout();
+                  }}
+                >
+                  Logout
+                </div>
               </div>
             )}
           </div>
