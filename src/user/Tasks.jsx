@@ -1,157 +1,316 @@
-// src/components/Tasks
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { TaskContext } from './TaskContext';
 import './Tasks.css';
-import addIcon from '../assets/icons/more.png'; // Import the image
+import addIcon from '../assets/icons/more.png';
 
 const Tasks = () => {
-  const { tasks, addTask, deleteTask, updateTask, lists, addList, deleteList, updateList } = useContext(TaskContext);
+  const { 
+    tasks, 
+    lists, 
+    loading,
+    selectedList,
+    setSelectedList,
+    defaultView,
+    setView,
+    addTask, 
+    deleteTask, 
+    updateTask, 
+    addList, 
+    deleteList, 
+    updateList,
+    fetchTasks
+  } = useContext(TaskContext);
+  
   const [newTask, setNewTask] = useState('');
-  const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
   const [taskDetails, setTaskDetails] = useState('');
-  const [selectedListIndex, setSelectedListIndex] = useState(null); // Track selected sidebar link
-  const [popupVisible, setPopupVisible] = useState(false); // Track popup visibility
-  const [popupListIndex, setPopupListIndex] = useState(null); // Track the list for the popup
+  const [tempDescription, setTempDescription] = useState('');
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [popupList, setPopupList] = useState(null);
+
+  const MAX_TITLE_LENGTH = 50; // Maximum length for task titles
+
+  const getTruncatedTitle = (title) => {
+    if (title.length > MAX_TITLE_LENGTH) {
+      return `${title.substring(0, MAX_TITLE_LENGTH)}...`;
+    }
+    return title;
+  };
 
   const handleAddTask = () => {
-    if (newTask.trim()) {
-      addTask({ title: newTask, description: '', listId: selectedListIndex });
+    if (newTask.trim() && selectedList) {
+      addTask({ 
+        title: newTask, 
+        description: '', 
+        listId: selectedList.id 
+      });
       setNewTask('');
     }
   };
 
-  const handleKeyPress = (event) => {
-    if (event.key === 'Enter') {
-      handleAddTask();
+  const handleTaskClick = (task) => {
+    setSelectedTask(task);
+    setTaskDetails(task.description || '');
+    setTempDescription(task.description || '');
+  };
+
+  const handleDescriptionChange = (e) => {
+    setTempDescription(e.target.value);
+  };
+
+  const saveDescription = async () => {
+    if (selectedTask && tempDescription !== taskDetails) {
+      try {
+        await updateTask(selectedTask.id, {
+          ...selectedTask,
+          description: tempDescription
+        });
+        setTaskDetails(tempDescription);
+        setSelectedTask({
+          ...selectedTask,
+          description: tempDescription
+        });
+      } catch (error) {
+        alert('Failed to update task description');
+      }
     }
   };
 
-  const handleTaskClick = (task) => {
-    setSelectedTaskIndex(tasks.findIndex(t => t === task));
-    setTaskDetails(task.description);
+  const resetDescription = () => {
+    setTempDescription(taskDetails); // Reset to the original description
   };
 
-  const handleTaskDetailsChange = (event) => {
-    setTaskDetails(event.target.value);
-    updateTask(selectedTaskIndex, { ...tasks[selectedTaskIndex], description: event.target.value });
+  const handleTaskDelete = (e, taskId) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      deleteTask(taskId)
+        .catch(() => alert('Failed to delete task'));
+    }
   };
 
   const handleAddList = () => {
     const listName = prompt('Enter the name of the new list:');
-    if (listName) {
-      addList({ name: listName });
+    if (listName && listName.trim()) {
+      addList({ name: listName.trim() });
     }
   };
 
-  const handleListDoubleClick = (index) => {
-    setPopupListIndex(index);
+  const handleListDoubleClick = (list) => {
+    setPopupList(list);
     setPopupVisible(true);
   };
 
   const handleUpdateList = () => {
-    const newListName = prompt('Enter the new name of the list:');
-    if (newListName) {
-      updateList(popupListIndex, { name: newListName });
+    const newListName = prompt('Enter the new name of the list:', popupList.name);
+    if (newListName && newListName.trim()) {
+      updateList(popupList.id, { ...popupList, name: newListName.trim() });
       setPopupVisible(false);
     }
   };
 
   const handleDeleteList = () => {
-    deleteList(popupListIndex);
-    setPopupVisible(false);
+    if (window.confirm(`Are you sure you want to delete the list "${popupList.name}"?`)) {
+      deleteList(popupList.id)
+        .then(() => setPopupVisible(false))
+        .catch(() => alert('Failed to delete list'));
+    }
   };
 
-  const handleClosePopup = () => {
-    setPopupVisible(false);
+  const handleListClick = (list) => {
+    setSelectedList(list);
+    setSelectedTask(null);
   };
 
-  const handleListClick = (index) => {
-    setSelectedListIndex(index); // Set the selected list index
-    setSelectedTaskIndex(null); // Reset selected task when changing lists
+  const renderLists = () => {
+    if (!Array.isArray(lists)) {
+      return null;
+    }
+    
+    return lists.map((list) => (
+      <div
+        key={list.id}
+        className={`tasks-sidebar-links ${
+          selectedList?.id === list.id ? 'active' : ''
+        }`}
+        onClick={() => handleListClick(list)}
+        onDoubleClick={() => handleListDoubleClick(list)}
+      >
+        {list.name}
+      </div>
+    ));
   };
+  
 
-  const filteredTasks = selectedListIndex !== null
-    ? tasks.filter(task => task.listId === selectedListIndex)
-    : [];
+  const getMainContent = () => {
+    if (!selectedList && !defaultView) {
+      return (
+        <div className="tasks-main">
+          <h2 className='todays-tasks-title'>Select a List</h2>
+          <p>Please select a list or view from the sidebar to manage your tasks.</p>
+        </div>
+      );
+    }
+    
+    let title = defaultView ? defaultView : (selectedList?.name || '');
 
-  return (
-    <div className="tasks">
-      <div className="tasks-sidebar">
-        <div className='tasks-sidebar-links' onClick={() => setSelectedListIndex(null)}>Today</div>
-        <div className='tasks-sidebar-links' onClick={() => setSelectedListIndex(null)}>Next 7 Days</div>
-        <div className='tasks-sidebar-links' onClick={() => setSelectedListIndex(null)}>Inbox</div>
-        <hr />
-        <div className='tasks-sidebar-links sidebar-lists'>
-          <p className='sidebar-lists-heading'>Lists</p>
-          <img src={addIcon} alt="Add List" className="add-list-icon" onClick={handleAddList} />
-          {lists.map((list, index) => (
-            <div
-              key={index}
-              className={`tasks-sidebar-links ${selectedListIndex === index ? 'active' : ''}`}
-              onClick={() => handleListClick(index)}
-              onDoubleClick={() => handleListDoubleClick(index)} // Show popup on double-click
+    return (
+      <div className="tasks-main">
+        <h2 className='todays-tasks-title'>{title}</h2>
+        {selectedList && (
+          <>
+            <input
+              type="text"
+              placeholder="Add a new task"
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleAddTask()}
+              className='task-input'
+            />
+            <button onClick={handleAddTask} className='addtask-button'>
+              Add Task
+            </button>
+          </>
+        )}
+        <div className="task-list">
+          {tasks.map((task) => (
+            <div 
+              key={task.id} 
+              className="task-item" 
+              onClick={() => handleTaskClick(task)}
             >
-              {list.name}
+              <span className="task-title">{getTruncatedTitle(task.title)}</span>
+              <button 
+                onClick={(e) => handleTaskDelete(e, task.id)} 
+                className='deletetask-button'
+              >
+                Delete
+              </button>
             </div>
           ))}
         </div>
       </div>
-      {selectedListIndex !== null && (
-        <div className="tasks-main">
-          <h2 className='todays-tasks-title'>{lists[selectedListIndex]?.name || "Tasks"}</h2>
-          <input
-            type="text"
-            placeholder="Add a new task"
-            value={newTask}
-            onChange={(e) => setNewTask(e.target.value)}
-            onKeyPress={handleKeyPress}
-            className='task-input'
-          />
-          <button onClick={handleAddTask} className='addtask-button'>Add Task</button>
-          <div className="task-list">
-            {filteredTasks.map((task, index) => (
-              <div key={index} className="task-item" onClick={() => handleTaskClick(task)}>
-                {task.title}
+    );
+  };
+
+  const getTaskDetails = () => {
+    if (!selectedList && !defaultView) return null;
+  
+    return (
+      <div className="tasks-main2">
+        <h2 className="task-description-title">
+          {selectedTask ? selectedTask.title : 'Task Description'}
+        </h2>
+        <div className="task-description">
+          {selectedTask ? (
+            <div className="description-edit-container">
+              <textarea
+                value={tempDescription}
+                onChange={handleDescriptionChange}
+                placeholder="Add more details about the task"
+                className="task-details-input"
+              />
+              <div className="description-buttons">
                 <button 
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent triggering the parent div's onClick
-                    const actualIndex = tasks.findIndex(t => t === task);
-                    deleteTask(actualIndex);
-                  }} 
-                  className='deletetask-button'
+                  onClick={saveDescription} 
+                  className="save-button"
+                  disabled={tempDescription === taskDetails} // Disable if no changes
                 >
-                  Delete
+                  Save
+                </button>
+                <button 
+                  onClick={resetDescription} 
+                  className="cancel-button"
+                  disabled={tempDescription === taskDetails} // Disable if no changes
+                >
+                  Reset
                 </button>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            'Select a task to view details'
+          )}
         </div>
-      )}
-      {selectedListIndex !== null && (
-        <div className="tasks-main2">
-          <h2 className='task-description-title'>
-            {selectedTaskIndex !== null ? tasks[selectedTaskIndex]?.title : 'Task Description'}
-          </h2>
-          <div className='task-description'>
-            {selectedTaskIndex !== null ? (
-              <textarea
-                value={taskDetails}
-                onChange={handleTaskDetailsChange}
-                placeholder="Add more details about the task"
-                className='task-details-input'
-              />
-            ) : (
-              'Select a task to view details'
-            )}
-          </div>
+      </div>
+    );
+  };
+  
+  const findListByName = (name) => {
+    return lists.find(list => list.name === name);
+  };
+
+  if (loading) {
+    return <div className="tasks">Loading...</div>;
+  }
+
+  return (
+    <div className="tasks">
+      <div className="tasks-sidebar">
+        <div 
+          className={`tasks-sidebar-links ${defaultView === 'Today' ? 'active' : ''}`} 
+          onClick={() => {
+            const todayList = findListByName('Today');
+            if (todayList) {
+              setSelectedList(todayList);
+            } else {
+              setView('Today');
+            }
+          }}
+        >
+          Today
         </div>
-      )}
+        <div 
+          className={`tasks-sidebar-links ${defaultView === 'Next 7 Days' ? 'active' : ''}`} 
+          onClick={() => {
+            const next7List = findListByName('Next 7 Days');
+            if (next7List) {
+              setSelectedList(next7List);
+            } else {
+              setView('Next 7 Days');
+            }
+          }}
+        >
+          Next 7 Days
+        </div>
+        <div 
+          className={`tasks-sidebar-links ${defaultView === 'Inbox' ? 'active' : ''}`} 
+          onClick={() => {
+            const inboxList = findListByName('Inbox');
+            if (inboxList) {
+              setSelectedList(inboxList);
+            } else {
+              setView('Inbox');
+            }
+          }}
+        >
+          Inbox
+        </div>
+        <hr />
+        <div className='tasks-sidebar-links sidebar-lists'>
+          <p className='sidebar-lists-heading'>Lists</p>
+          <img 
+            src={addIcon} 
+            alt="Add List" 
+            className="add-list-icon" 
+            onClick={handleAddList} 
+          />
+          {renderLists()}
+        </div>
+      </div>
+      
+      {getMainContent()}
+      {getTaskDetails()}
+      
       {popupVisible && (
         <div className="popup">
           <div className="popup-content">
             <button onClick={handleUpdateList}>Update</button>
-            <button onClick={handleDeleteList}>Delete</button>
-            <button onClick={handleClosePopup}>Close</button>
+            <button 
+              onClick={handleDeleteList}
+              disabled={['Today', 'Next 7 Days', 'Inbox'].includes(popupList?.name)}
+            >
+              Delete
+            </button>
+            <button onClick={() => setPopupVisible(false)}>Close</button>
           </div>
         </div>
       )}
