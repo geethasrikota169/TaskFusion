@@ -1,0 +1,101 @@
+/* Header */
+.dashboard-header {
+  height: 55px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background-color: white;
+  border-bottom: 1px solid rgb(228, 228, 228);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  width: 210px;
+  height: 55px;
+  background-color: rgb(255, 255, 255);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.app-icon {
+  margin-top: 0px;
+  height: 57px;
+  color: black;
+  width: 200px;
+  margin-left: 0px;
+}
+
+.notif-icon {
+  height: 22px;
+  margin-left: 14px;
+  margin-right: 14px;
+  cursor: pointer;
+}
+
+/* Profile Container */
+.navbar-profile-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.profile-image {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Dropdown */
+.manager-dropdown {
+  position: relative;
+}
+
+.manager-dropdown-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 17px;
+  color: #333;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.manager-dropdown-toggle:hover {
+  background-color: #f0f0f0;
+}
+
+.manager-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 30px;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 160px;
+}
+
+.manager-dropdown-item {
+  display: block;
+  padding: 8px 16px;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.manager-dropdown-item:hover {
+  background-color: #f5f5f5;
+}

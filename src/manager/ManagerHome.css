@@ -1,0 +1,98 @@
+/* Manager Dashboard */
+.manager-dashboard {
+  margin-left: 60px; 
+  margin-top: 70px; 
+  padding: 20px; 
+  border-radius: 10px;
+}
+
+/* Task Stats */
+.m-task-stats {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  padding: 20px;
+  background-color: #f4f4f4;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Task Card */
+.m-task-card {
+  flex: 1;
+  margin: 0 10px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 200px;
+}
+
+.m-task-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Task Card Content */
+.m-task-card-content {
+  display: flex;
+  align-items: center;
+  gap: 90px;
+}
+
+/* Task Icon */
+.m-task-icon {
+  width: 50px; 
+  height: 50px; 
+}
+
+/* Task Title */
+.m-task-title {
+  color: black;
+  margin: 0;
+  padding: 0;
+}
+
+/* Task Count */
+.m-tasks-count {
+  color: black;
+  font-size: larger;
+  margin: 0;
+  margin-right: 35px;
+}
+
+/* Specific Titles */
+.m-total-title {
+  margin-right: 90px;
+}
+
+.m-completed-title {
+  margin-right: 40px;
+}
+
+.m-inprogress-title {
+  margin-right: 30px;
+}
+
+.m-todo-title {
+  margin-right: 125px;
+}
+
+/* Task Graph */
+.m-task-graph {
+  margin-top: 40px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background-color: #f4f4f4;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 400px;
+  color: black;
+}

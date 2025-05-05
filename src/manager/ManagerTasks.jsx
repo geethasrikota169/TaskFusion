@@ -1,49 +1,41 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { TaskContext } from './TaskContext';
-import './Tasks.css';
+import React, { useContext, useState } from 'react';
+import { ManagerTaskContext } from './ManagerTaskContext';
+import '../user/Tasks.css';
 import addIcon from '../assets/icons/more.png';
 
-const Tasks = () => {
-  const { 
-    tasks, 
-    lists, 
+const ManagerTasks = () => {
+  const {
+    tasks,
+    lists,
     loading,
     selectedList,
     setSelectedList,
     defaultView,
     setView,
-    addTask, 
-    deleteTask, 
-    updateTask, 
-    addList, 
-    deleteList, 
+    addTask,
+    deleteTask,
+    updateTask,
+    addList,
+    deleteList,
     updateList,
-    fetchTasks
-  } = useContext(TaskContext);
-  
+  } = useContext(ManagerTaskContext);
+
   const [newTask, setNewTask] = useState('');
   const [selectedTask, setSelectedTask] = useState(null);
   const [taskDetails, setTaskDetails] = useState('');
   const [tempDescription, setTempDescription] = useState('');
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupList, setPopupList] = useState(null);
-  const [showToast, setShowToast] = useState(false); // Toast state
+  const [showToast, setShowToast] = useState(false); // Toast
 
   const MAX_TITLE_LENGTH = 50;
 
-  const getTruncatedTitle = (title) => {
-    return title.length > MAX_TITLE_LENGTH
-      ? `${title.substring(0, MAX_TITLE_LENGTH)}...`
-      : title;
-  };
+  const getTruncatedTitle = (title) =>
+    title.length > MAX_TITLE_LENGTH ? `${title.substring(0, MAX_TITLE_LENGTH)}...` : title;
 
   const handleAddTask = () => {
     if (newTask.trim() && selectedList) {
-      addTask({ 
-        title: newTask, 
-        description: '', 
-        listId: selectedList.id 
-      });
+      addTask({ title: newTask, description: '', listId: selectedList.id });
       setNewTask('');
     }
   };
@@ -54,41 +46,31 @@ const Tasks = () => {
     setTempDescription(task.description || '');
   };
 
-  const handleDescriptionChange = (e) => {
-    setTempDescription(e.target.value);
-  };
+  const handleDescriptionChange = (e) => setTempDescription(e.target.value);
 
   const saveDescription = async () => {
     if (selectedTask && tempDescription !== taskDetails) {
       try {
         await updateTask(selectedTask.id, {
           ...selectedTask,
-          description: tempDescription
+          description: tempDescription,
         });
         setTaskDetails(tempDescription);
-        setSelectedTask({
-          ...selectedTask,
-          description: tempDescription
-        });
-
-        setShowToast(true); // Show toast
-        setTimeout(() => setShowToast(false), 3000); // Auto-hide after 3s
-
-      } catch (error) {
+        setSelectedTask({ ...selectedTask, description: tempDescription });
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+      } catch {
         alert('Failed to update task description');
       }
     }
   };
 
-  const resetDescription = () => {
-    setTempDescription(taskDetails);
-  };
+  const resetDescription = () => setTempDescription(taskDetails);
 
   const handleTaskDelete = (e, taskId) => {
     e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this task?')) {
-      deleteTask(taskId)
-        .catch(() => alert('Failed to delete task'));
+      deleteTask(taskId).catch(() => alert('Failed to delete task'));
     }
   };
 
@@ -99,41 +81,38 @@ const Tasks = () => {
     }
   };
 
+  const handleListClick = (list) => {
+    setSelectedList(list);
+    setSelectedTask(null);
+  };
+
   const handleListDoubleClick = (list) => {
     setPopupList(list);
     setPopupVisible(true);
   };
 
   const handleUpdateList = () => {
-    const newListName = prompt('Enter the new name of the list:', popupList.name);
-    if (newListName && newListName.trim()) {
-      updateList(popupList.id, { ...popupList, name: newListName.trim() });
+    const newName = prompt('Enter new list name:', popupList.name);
+    if (newName && newName.trim()) {
+      updateList(popupList.id, { ...popupList, name: newName.trim() });
       setPopupVisible(false);
     }
   };
 
   const handleDeleteList = () => {
-    if (window.confirm(`Are you sure you want to delete the list "${popupList.name}"?`)) {
+    if (window.confirm(`Delete list "${popupList.name}"?`)) {
       deleteList(popupList.id)
         .then(() => setPopupVisible(false))
         .catch(() => alert('Failed to delete list'));
     }
   };
 
-  const handleListClick = (list) => {
-    setSelectedList(list);
-    setSelectedTask(null);
-  };
-
   const renderLists = () => {
     if (!Array.isArray(lists)) return null;
-
     return lists.map((list) => (
       <div
         key={list.id}
-        className={`tasks-sidebar-links ${
-          selectedList?.id === list.id ? 'active' : ''
-        }`}
+        className={`tasks-sidebar-links ${selectedList?.id === list.id ? 'active' : ''}`}
         onClick={() => handleListClick(list)}
         onDoubleClick={() => handleListDoubleClick(list)}
       >
@@ -147,12 +126,12 @@ const Tasks = () => {
       return (
         <div className="tasks-main">
           <h2 className='todays-tasks-title'>Select a List</h2>
-          <p>Please select a list or view from the sidebar to manage your tasks.</p>
+          <p>Select a list from the sidebar to manage tasks.</p>
         </div>
       );
     }
-    
-    let title = defaultView ? defaultView : (selectedList?.name || '');
+
+    const title = defaultView || selectedList?.name || '';
 
     return (
       <div className="tasks-main">
@@ -167,25 +146,14 @@ const Tasks = () => {
               onKeyPress={(e) => e.key === 'Enter' && handleAddTask()}
               className='task-input'
             />
-            <button onClick={handleAddTask} className='addtask-button'>
-              Add Task
-            </button>
+            <button onClick={handleAddTask} className='addtask-button'>Add Task</button>
           </>
         )}
         <div className="task-list">
           {tasks.map((task) => (
-            <div 
-              key={task.id} 
-              className="task-item" 
-              onClick={() => handleTaskClick(task)}
-            >
+            <div key={task.id} className="task-item" onClick={() => handleTaskClick(task)}>
               <span className="task-title">{getTruncatedTitle(task.title)}</span>
-              <button 
-                onClick={(e) => handleTaskDelete(e, task.id)} 
-                className='deletetask-button'
-              >
-                Delete
-              </button>
+              <button onClick={(e) => handleTaskDelete(e, task.id)} className='deletetask-button'>Delete</button>
             </div>
           ))}
         </div>
@@ -211,15 +179,15 @@ const Tasks = () => {
                 className="task-details-input"
               />
               <div className="description-buttons">
-                <button 
-                  onClick={saveDescription} 
+                <button
+                  onClick={saveDescription}
                   className="save-button"
                   disabled={tempDescription === taskDetails}
                 >
                   Save
                 </button>
-                <button 
-                  onClick={resetDescription} 
+                <button
+                  onClick={resetDescription}
                   className="cancel-button"
                   disabled={tempDescription === taskDetails}
                 >
@@ -235,8 +203,16 @@ const Tasks = () => {
     );
   };
 
-  const findListByName = (name) => {
-    return lists.find(list => list.name === name);
+  const findListByName = (name) => lists.find(list => list.name === name);
+
+  const handleViewClick = (viewName) => {
+    const list = findListByName(viewName);
+    if (list) {
+      setSelectedList(list);
+    } else {
+      setView(viewName);
+      setSelectedList(null);
+    }
   };
 
   if (loading) {
@@ -246,54 +222,28 @@ const Tasks = () => {
   return (
     <div className="tasks">
       <div className="tasks-sidebar">
-        <div 
-          className={`tasks-sidebar-links ${defaultView === 'Today' ? 'active' : ''}`} 
-          onClick={() => {
-            const todayList = findListByName('Today');
-            if (todayList) {
-              setSelectedList(todayList);
-            } else {
-              setView('Today');
-            }
-          }}
+        <div
+          className={`tasks-sidebar-links ${defaultView === 'Today' ? 'active' : ''}`}
+          onClick={() => handleViewClick('Today')}
         >
           Today
         </div>
-        <div 
-          className={`tasks-sidebar-links ${defaultView === 'Next 7 Days' ? 'active' : ''}`} 
-          onClick={() => {
-            const next7List = findListByName('Next 7 Days');
-            if (next7List) {
-              setSelectedList(next7List);
-            } else {
-              setView('Next 7 Days');
-            }
-          }}
+        <div
+          className={`tasks-sidebar-links ${defaultView === 'Next 7 Days' ? 'active' : ''}`}
+          onClick={() => handleViewClick('Next 7 Days')}
         >
           Next 7 Days
         </div>
-        <div 
-          className={`tasks-sidebar-links ${defaultView === 'Inbox' ? 'active' : ''}`} 
-          onClick={() => {
-            const inboxList = findListByName('Inbox');
-            if (inboxList) {
-              setSelectedList(inboxList);
-            } else {
-              setView('Inbox');
-            }
-          }}
+        <div
+          className={`tasks-sidebar-links ${defaultView === 'Inbox' ? 'active' : ''}`}
+          onClick={() => handleViewClick('Inbox')}
         >
           Inbox
         </div>
         <hr />
         <div className='tasks-sidebar-links sidebar-lists'>
           <p className='sidebar-lists-heading'>Lists</p>
-          <img 
-            src={addIcon} 
-            alt="Add List" 
-            className="add-list-icon" 
-            onClick={handleAddList} 
-          />
+          <img src={addIcon} alt="Add List" className="add-list-icon" onClick={handleAddList} />
           {renderLists()}
         </div>
       </div>
@@ -305,7 +255,7 @@ const Tasks = () => {
         <div className="popup">
           <div className="popup-content">
             <button onClick={handleUpdateList}>Update</button>
-            <button 
+            <button
               onClick={handleDeleteList}
               disabled={['Today', 'Next 7 Days', 'Inbox'].includes(popupList?.name)}
             >
@@ -316,14 +266,11 @@ const Tasks = () => {
         </div>
       )}
 
-      {/* Toast Notification */}
       {showToast && (
-        <div className="toast-notification">
-          Saved
-        </div>
+        <div className="toast-notification">Saved!</div>
       )}
     </div>
   );
 };
 
-export default Tasks;
+export default ManagerTasks;

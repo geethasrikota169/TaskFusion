@@ -4,7 +4,7 @@ export default function AdminHome() {
 
   return (
     <div>
-      <h3>Ee Sala Cup Namde</h3>
+      <h3>Welcome Admin</h3>
     </div>
   )
 }

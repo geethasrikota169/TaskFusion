@@ -5,7 +5,7 @@ const AuthContext = createContext();
 
 // Provider component to manage login states and user data
 export function AuthProvider({ children }) {
-  // Load initial state from localStorage or default to false/null
+  // Load initial login states from localStorage
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
     return localStorage.getItem('isAdminLoggedIn') === 'true';
   });
@@ -13,7 +13,7 @@ export function AuthProvider({ children }) {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(() => {
     return localStorage.getItem('isUserLoggedIn') === 'true';
   });
-  
+
   const [isManagerLoggedIn, setIsManagerLoggedIn] = useState(() => {
     return localStorage.getItem('isManagerLoggedIn') === 'true';
   });
@@ -24,14 +24,14 @@ export function AuthProvider({ children }) {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  // Save all auth states to localStorage whenever they change
+  // Sync login states with localStorage
   useEffect(() => {
     localStorage.setItem('isAdminLoggedIn', isAdminLoggedIn);
     localStorage.setItem('isUserLoggedIn', isUserLoggedIn);
     localStorage.setItem('isManagerLoggedIn', isManagerLoggedIn);
   }, [isAdminLoggedIn, isUserLoggedIn, isManagerLoggedIn]);
 
-  // Save user data to localStorage when it changes
+  // Sync userData with localStorage
   useEffect(() => {
     if (userData) {
       localStorage.setItem('userData', JSON.stringify(userData));
@@ -40,7 +40,7 @@ export function AuthProvider({ children }) {
     }
   }, [userData]);
 
-  // Clear all auth data (for logout)
+  // Clear all login states and user data
   const clearAuthData = () => {
     setIsAdminLoggedIn(false);
     setIsUserLoggedIn(false);

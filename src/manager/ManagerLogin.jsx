@@ -14,7 +14,7 @@ export default function ManagerLogin() {
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
-  const { setIsManagerLoggedIn } = useAuth();
+  const { setIsManagerLoggedIn, setUserData } = useAuth(); // Now includes setUserData
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -23,18 +23,30 @@ export default function ManagerLogin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
       const response = await axios.post(`${config.url}/manager/checkmanagerlogin`, formData);
-  
-      if(response.status === 200) {
+
+      if (response.status === 200) {
+        // Store complete manager data in context
+        setUserData({
+          id: response.data.id,
+          username: response.data.username,
+          name: response.data.name,
+          email: response.data.email,
+          gender: response.data.gender,
+          dob: response.data.dob,
+          mobileno: response.data.mobileno,
+          location: response.data.location
+        });
+
         setIsManagerLoggedIn(true);
         navigate("/managerhome");
       } else {
         setError(response.data || "Login failed. Please check credentials.");
       }
     } catch (error) {
-      if(error.response) {
+      if (error.response) {
         setError(error.response.data || "An unexpected error occurred.");
       } else {
         setError("An unexpected error occurred.");
@@ -47,10 +59,10 @@ export default function ManagerLogin() {
       <div className="login-card">
         <div className="login-left">
           <h1 className="login-title">Manager Login</h1>
-          
+
           {error && (
-            <div className="error-message" style={{ 
-              color: 'red', 
+            <div className="error-message" style={{
+              color: 'red',
               marginBottom: '15px',
               padding: '10px',
               backgroundColor: '#ffeeee',
@@ -60,20 +72,20 @@ export default function ManagerLogin() {
             </div>
           )}
 
-          <input 
-            type="text" 
+          <input
+            type="text"
             id="username"
-            placeholder="Username" 
-            className="email-input" 
+            placeholder="Username"
+            className="email-input"
             value={formData.username}
             onChange={handleChange}
             required
           />
-          <input 
-            type="password" 
+          <input
+            type="password"
             id="password"
-            placeholder="Password" 
-            className="password-input" 
+            placeholder="Password"
+            className="password-input"
             value={formData.password}
             onChange={handleChange}
             required
