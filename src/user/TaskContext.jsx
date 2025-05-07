@@ -66,17 +66,36 @@ export const TaskProvider = ({ children }) => {
 
   const addTask = async (task) => {
     try {
+      console.log("Adding task with data:", {
+        title: task.title,
+        description: task.description || '',
+        listId: task.listId,
+        username: userData.username
+      });
+  
       const response = await axios.post(`${config.url}/tasks`, null, {
         params: {
           title: task.title,
           description: task.description || '',
           listId: task.listId,
           username: userData.username
+        },
+        paramsSerializer: params => {
+          return Object.entries(params)
+            .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+            .join('&');
         }
       });
-      setTasks([...tasks, response.data]);
+      
+      setTasks(prev => [...prev, response.data]);
+      return response.data;
     } catch (error) {
-      console.error("Error adding task:", error);
+      console.error("Error adding task:", {
+        message: error.message,
+        response: error.response?.data,
+        config: error.config
+      });
+      throw error;
     }
   };
 
@@ -94,13 +113,32 @@ export const TaskProvider = ({ children }) => {
 
   const updateTask = async (taskId, updatedTask) => {
     try {
-      const response = await axios.put(`${config.url}/tasks/${taskId}`, updatedTask, {
+      // Get fresh task data from state first
+      const currentTasks = [...tasks];
+      const taskIndex = currentTasks.findIndex(t => t.id === taskId);
+      
+      if (taskIndex === -1) return;
+      
+      // Merge updates with existing task data
+      const mergedTask = {
+        ...currentTasks[taskIndex],
+        ...updatedTask
+      };
+      
+      console.log("Sending merged update:", mergedTask);
+      
+      const response = await axios.put(`${config.url}/tasks/${taskId}`, mergedTask, {
         params: { username: userData.username }
       });
-      setTasks(tasks.map(task => task.id === taskId ? response.data : task));
-      return response.data; // Return updated task
+      
+      // Update state immutably
+      setTasks(currentTasks.map(task => 
+        task.id === taskId ? response.data : task
+      ));
+      
+      return response.data;
     } catch (error) {
-      console.error("Error updating task:", error);
+      console.error("Update error:", error.response?.data || error.message);
       throw error;
     }
   };
@@ -119,22 +157,47 @@ export const TaskProvider = ({ children }) => {
     }
   };
 
-  const deleteList = async (listId) => {
-    try {
-      await axios.delete(`${config.url}/tasks/lists/${listId}`, {
-        params: { username: userData.username }
-      });
-      setLists(lists.filter(list => list.id !== listId));
-      setTasks(tasks.filter(task => task.list?.id !== listId));
-      
-      if (selectedList?.id === listId) {
-        setSelectedList(null);
+const deleteList = async (listId) => {
+  try {
+    const tasksInList = tasks.filter(task => task.list?.id === listId);
+    
+    if (tasksInList.length > 0) {
+      for (const task of tasksInList) {
+        try {
+          await axios.delete(`${config.url}/tasks/${task.id}`, {
+            params: { username: userData.username }
+          });
+        } catch (taskError) {
+          console.error(`Error deleting task ${task.id}:`, taskError);
+        }
       }
-    } catch (error) {
-      console.error("Error deleting list:", error);
-      throw error;
     }
-  };
+    
+    await axios.delete(`${config.url}/tasks/lists/${listId}`, {
+      params: { username: userData.username }
+    });
+    
+    setLists(lists.filter(list => list.id !== listId));
+    setTasks(tasks.filter(task => task.list?.id !== listId));
+    
+    if (selectedList?.id === listId) {
+      setSelectedList(null);
+    }
+    
+    return true; 
+  } catch (error) {
+    console.error("Error deleting list:", error);
+    
+    if (error.response) {
+      console.error("Server responded with:", {
+        status: error.response.status,
+        data: error.response.data
+      });
+    }
+    
+    throw error;
+  }
+};
 
   const updateList = async (listId, updatedList) => {
     try {
@@ -170,7 +233,8 @@ export const TaskProvider = ({ children }) => {
 
   return (
     <TaskContext.Provider value={{ 
-      tasks, 
+      tasks,
+      setTasks,  
       lists, 
       loading,
       selectedList,

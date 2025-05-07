@@ -1,11 +1,17 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import { TaskContext } from './TaskContext';
+import TaskItem from './TaskItem';
+import TaskPopup from './Taskpopup';
 import './Tasks.css';
+import './TaskPopup.css';
 import addIcon from '../assets/icons/more.png';
+import { useAuth } from '../contextapi/AuthContext';
 
 const Tasks = () => {
+  const { userData } = useAuth();
   const { 
     tasks, 
+    setTasks, 
     lists, 
     loading,
     selectedList,
@@ -27,9 +33,10 @@ const Tasks = () => {
   const [tempDescription, setTempDescription] = useState('');
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupList, setPopupList] = useState(null);
-  const [showToast, setShowToast] = useState(false); // Toast state
+  const [showToast, setShowToast] = useState(false);
+  const [showTaskPopup, setShowTaskPopup] = useState(false);
 
-  const MAX_TITLE_LENGTH = 50;
+  const MAX_TITLE_LENGTH = 30;
 
   const getTruncatedTitle = (title) => {
     return title.length > MAX_TITLE_LENGTH
@@ -54,42 +61,101 @@ const Tasks = () => {
     setTempDescription(task.description || '');
   };
 
+  const handleTaskDoubleClick = (task) => {
+    setSelectedTask(task);
+    setShowTaskPopup(true);
+  };
+
+  const handleTaskDelete = async (taskId) => {
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      try {
+        await deleteTask(taskId);
+      } catch (error) {
+        console.error("Failed to delete task:", error);
+      }
+    }
+  };
+
   const handleDescriptionChange = (e) => {
     setTempDescription(e.target.value);
   };
 
+  const handleTaskUpdate = async (updatedTask) => {
+    if (!userData?.username) {
+      console.error("Cannot update task - user not authenticated");
+      throw new Error("User not authenticated");
+    }
+  
+    try {
+      const response = await fetch(`http://localhost:2002/tasks/${updatedTask.id}/metadata`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'username': userData.username // Send username in headers
+        },
+        body: JSON.stringify(updatedTask),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Update failed');
+      }
+      
+      const result = await response.json();
+      
+      // Update local state
+      setTasks(tasks.map(t => t.id === updatedTask.id ? result : t));
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      return result;
+    } catch (error) {
+      console.error("Failed to update task:", {
+        error: error.message,
+        taskId: updatedTask?.id,
+        payload: updatedTask
+      });
+      throw error;
+    }
+  };
+  
   const saveDescription = async () => {
     if (selectedTask && tempDescription !== taskDetails) {
       try {
-        await updateTask(selectedTask.id, {
-          ...selectedTask,
-          description: tempDescription
+        const response = await fetch(`http://localhost:2002/tasks/${selectedTask.id}/description`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'username': userData.username // Make sure userData is from your auth context
+          },
+          body: JSON.stringify({
+            description: tempDescription
+          }),
+          credentials: 'include'
         });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Update failed');
+        }
+        
+        const updatedTask = await response.json();
+        
+        // Update local state
         setTaskDetails(tempDescription);
-        setSelectedTask({
-          ...selectedTask,
-          description: tempDescription
-        });
-
-        setShowToast(true); // Show toast
-        setTimeout(() => setShowToast(false), 3000); // Auto-hide after 3s
-
+        setSelectedTask(updatedTask);
+        setTasks(tasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
       } catch (error) {
-        alert('Failed to update task description');
+        console.error('Failed to update task description:', error);
+        alert(`Failed to save description: ${error.message}`);
       }
     }
   };
 
   const resetDescription = () => {
     setTempDescription(taskDetails);
-  };
-
-  const handleTaskDelete = (e, taskId) => {
-    e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      deleteTask(taskId)
-        .catch(() => alert('Failed to delete task'));
-    }
   };
 
   const handleAddList = () => {
@@ -112,13 +178,27 @@ const Tasks = () => {
     }
   };
 
-  const handleDeleteList = () => {
-    if (window.confirm(`Are you sure you want to delete the list "${popupList.name}"?`)) {
-      deleteList(popupList.id)
-        .then(() => setPopupVisible(false))
-        .catch(() => alert('Failed to delete list'));
-    }
-  };
+  // Update the handleDeleteList function in Tasks.jsx
+const handleDeleteList = () => {
+  if (window.confirm(`Are you sure you want to delete the list "${popupList.name}"?`)) {
+    // Show a loading indicator or message
+    setShowToast(true);
+    
+    deleteList(popupList.id)
+      .then(() => {
+        setPopupVisible(false);
+        // Show success message
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+      })
+      .catch((error) => {
+        console.error("Failed to delete list:", error);
+        // Show error message to user
+        alert(`Could not delete list "${popupList.name}". Please try again later.`);
+        setPopupVisible(false);
+      });
+  }
+};
 
   const handleListClick = (list) => {
     setSelectedList(list);
@@ -152,7 +232,7 @@ const Tasks = () => {
       );
     }
     
-    let title = defaultView ? defaultView : (selectedList?.name || '');
+    const title = defaultView ? defaultView : (selectedList?.name || '');
 
     return (
       <div className="tasks-main">
@@ -174,19 +254,15 @@ const Tasks = () => {
         )}
         <div className="task-list">
           {tasks.map((task) => (
-            <div 
-              key={task.id} 
-              className="task-item" 
+            <TaskItem
+              key={task.id}
+              task={{
+                ...task,
+                title: getTruncatedTitle(task.title), 
+              }}
               onClick={() => handleTaskClick(task)}
-            >
-              <span className="task-title">{getTruncatedTitle(task.title)}</span>
-              <button 
-                onClick={(e) => handleTaskDelete(e, task.id)} 
-                className='deletetask-button'
-              >
-                Delete
-              </button>
-            </div>
+              onDoubleClick={() => handleTaskDoubleClick(task)}
+            />
           ))}
         </div>
       </div>
@@ -316,7 +392,15 @@ const Tasks = () => {
         </div>
       )}
 
-      {/* Toast Notification */}
+      {showTaskPopup && selectedTask && (
+        <TaskPopup
+          task={selectedTask}
+          onClose={() => setShowTaskPopup(false)}
+          onUpdate={handleTaskUpdate}
+          onDelete={handleTaskDelete}
+        />
+      )}
+
       {showToast && (
         <div className="toast-notification">
           Saved
