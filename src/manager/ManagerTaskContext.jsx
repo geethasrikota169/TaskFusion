@@ -73,20 +73,23 @@ export const ManagerTaskProvider = ({ children }) => {
     };
 
     const addTask = async (task) => {
-        try {
-            const response = await axios.post(`${config.url}/manager/tasks`, null, {
-                params: {
-                    title: task.title,
-                    description: task.description || '',
-                    listId: task.listId,
-                    username: userData.username
-                }
-            });
-            setTasks(prev => [...prev, response.data]);
-        } catch (error) {
-            console.error("Error adding manager task:", error);
-        }
-    };
+      try {
+          const response = await axios.post(`${config.url}/manager/tasks`, null, {
+              params: {
+                  title: task.title,
+                  description: task.description || '',
+                  listId: task.listId,
+                  username: userData.username
+              }
+          });
+          setTasks(prev => [...prev, response.data]);
+          return { success: true };
+      } catch (error) {
+          console.error("Error adding manager task:", error);
+          const errorMsg = error.response?.data?.message || 'Failed to add task';
+          return { success: false, error: errorMsg };
+      }
+  };
 
     const deleteTask = async (taskId) => {
         try {
@@ -188,7 +191,9 @@ export const ManagerTaskProvider = ({ children }) => {
             updateList,
             defaultView,
             setView,
-            setDefaultView
+            setDefaultView,
+            userData,
+            setTasks,
         }}>
             {children}
         </ManagerTaskContext.Provider>
