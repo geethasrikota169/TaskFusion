@@ -1,10 +1,19 @@
-addtask-button{
-  background-color: rgb(0, 191, 255);
-  color:black;
-  border: none;
-  height:36px;
-  width:100px;
-  margin-left:15px;
-  border-radius:4px;
-}
- add this in tasks.css file
+add profile image and password edit options in 
+
+forgot password, when new registration is done mail to that email id with username and password
+
+filter by name or anything
+search option working
+
+status wise viewing option for tasks.
+
+today and next 7 days working
+maybe i am thinking remove the today and next 7days and add one thing a filter page,
+         in that you can filter by deadline (today, next 7 days, this month) and status, deadline
+
+add a completed section below filterpage in that completed page completed tasks should appear
+
+notifications for today deadline tasks and high priority tasks and if manager makes any changes in teamtasks he should be notified
+
+team tasks update delete operations by manager and popup for double click on teamtasks in that all data should be viewed
+

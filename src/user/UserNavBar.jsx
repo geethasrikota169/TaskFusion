@@ -13,6 +13,8 @@ import Sidebar from './Sidebar';
 import Pomodoro from './Pomodoro';
 import Tasks from './Tasks';
 import { TaskProvider } from './TaskContext';
+import TeamTasksPage from './TeamTasksPage';
+
 
 
 export default function UserNavBar() {
@@ -82,6 +84,7 @@ export default function UserNavBar() {
           <Route path="/userlogin" element={<UserLogin />} exact />
           <Route path="/pomodoro" element={<Pomodoro />} />
           <Route path="/usertasks" element={<Tasks />} />
+          <Route path="/teamtasks" element={<TeamTasksPage />} />
         </Routes>
       </TaskProvider>
     </div>

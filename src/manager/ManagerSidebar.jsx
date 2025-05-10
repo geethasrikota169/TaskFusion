@@ -18,9 +18,9 @@ const ManagerSidebar = () => {
       <Link to="/manager-tasks" className="m-sidebar-icon">
         <img src={Itasks} alt="Tasks Icon" className="m-icon m-task-icon-sidebar" />
       </Link>
-      <div className="m-sidebar-icon">
+      <Link to="/teamtasks" className="m-sidebar-icon">
         <img src={Iteams} alt="Teams Icon" className="m-icon m-teams-icon-sidebar" />
-      </div>
+      </Link>
       <div className="m-sidebar-icon">
         <img src={Icalendar} alt="Calendar Icon" className="m-icon m-calendar-icon-sidebar" />
       </div>

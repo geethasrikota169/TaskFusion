@@ -18,9 +18,9 @@ const Sidebar = () => {
       <Link to="/usertasks" className="sidebar-icon">
         <img src={Itasks} alt="Tasks Icon" className="icon task-icon-sidebar" />
       </Link>
-      <div className="sidebar-icon">
+      <Link to="/teamtasks" className="sidebar-icon">
         <img src={Iteams} alt="Teams Icon" className="icon teams-icon-sidebar" />
-      </div>
+      </Link>
       <div className="sidebar-icon">
         <img src={Icalendar} alt="Calendar Icon" className="icon calendar-icon-sidebar" />
       </div>
