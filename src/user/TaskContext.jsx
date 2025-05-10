@@ -12,7 +12,9 @@ export const TaskProvider = ({ children }) => {
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedList, setSelectedList] = useState(null);
-  const [defaultView, setDefaultView] = useState(null); // today, next7days, inbox
+  const [defaultView, setDefaultView] = useState(null); 
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
 
   const fetchLists = async () => {
     console.log('Fetching lists for user:', userData?.username);
@@ -49,20 +51,39 @@ export const TaskProvider = ({ children }) => {
   };
 
   const fetchTasks = async (listId) => {
-    if (!userData?.username || !listId) return;
-    
-    try {
-      const response = await axios.get(`${config.url}/tasks`, {
+  if (!userData?.username) return;
+  
+  try {
+    let response;
+    if (defaultView && !listId) {
+      response = await axios.get(`${config.url}/tasks/all`, {
+        params: { username: userData.username }
+      });
+    } else {
+      response = await axios.get(`${config.url}/tasks`, {
         params: { 
           listId: listId,
           username: userData.username 
         }
       });
-      setTasks(response.data);
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
     }
-  };
+    
+    const enhancedTasks = response.data.map(task => {
+      const list = lists.find(l => l.id === task.listId);
+      return {
+        ...task,
+        listName: list?.name || 'Uncategorized'
+      };
+    });
+    
+    setTasks(enhancedTasks);
+    return enhancedTasks;
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    setTasks([]);
+    return [];
+  }
+};
 
   const addTask = async (task) => {
     try {
@@ -107,7 +128,7 @@ export const TaskProvider = ({ children }) => {
       setTasks(tasks.filter(task => task.id !== taskId));
     } catch (error) {
       console.error("Error deleting task:", error);
-      throw error; // Re-throw to handle in UI if needed
+      throw error; 
     }
   };
 
@@ -225,6 +246,15 @@ const deleteList = async (listId) => {
   }, [userData]);
 
   useEffect(() => {
+  if (userData?.username && lists.length > 0) {
+    if (defaultView) { 
+      fetchTasks();
+    } else if (selectedList) {
+      fetchTasks(selectedList.id); 
+    }
+  }
+}, [defaultView, selectedList, lists]);
+  useEffect(() => {
     if (selectedList) {
       fetchTasks(selectedList.id);
       setDefaultView(null);
@@ -247,7 +277,11 @@ const deleteList = async (listId) => {
       addList, 
       deleteList, 
       updateList,
-      fetchTasks
+      fetchTasks,
+      priorityFilter,
+      setPriorityFilter,
+      statusFilter,
+      setStatusFilter
     }}>
       {children}
     </TaskContext.Provider>

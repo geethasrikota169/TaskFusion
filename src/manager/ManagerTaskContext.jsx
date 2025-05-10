@@ -13,12 +13,15 @@ export const ManagerTaskProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [selectedList, setSelectedList] = useState(null);
     const [defaultView, setDefaultView] = useState(null);
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [priorityFilter, setPriorityFilter] = useState('all');
+    const [deadlineFilter, setDeadlineFilter] = useState('all');
 
     const setView = (view) => {
         console.log(`Setting view to: ${view}`);
         setDefaultView(view);
         setSelectedList(null);
-        setTasks([]);
+        // We'll only reset tasks when actually fetching new ones
     };
 
     const fetchLists = async () => {
@@ -55,20 +58,40 @@ export const ManagerTaskProvider = ({ children }) => {
     };
 
     const fetchTasks = async (listId) => {
-        if (!userData?.username || !listId) return;
+        if (!userData?.username) return;
 
         try {
-            console.log(`Fetching tasks for list ${listId}`);
-            const response = await axios.get(`${config.url}/manager/tasks`, {
-                params: {
-                    listId: listId,
-                    username: userData.username
-                }
-            });
+            let response;
+            if (defaultView && !listId) {
+                console.log('Fetching all tasks for manager');
+                response = await axios.get(`${config.url}/manager/tasks/all`, {
+                    params: { username: userData.username }
+                });
+            } else {
+                console.log(`Fetching tasks for list ${listId}`);
+                response = await axios.get(`${config.url}/manager/tasks`, {
+                    params: {
+                        listId: listId,
+                        username: userData.username
+                    }
+                });
+            }
             console.log('Tasks response:', response.data);
-            setTasks(response.data);
+            
+            const enhancedTasks = response.data.map(task => {
+                const list = lists.find(l => l.id === task.listId);
+                return {
+                    ...task,
+                    listName: list?.name || 'Uncategorized'
+                };
+            });
+            
+            setTasks(enhancedTasks);
+            return enhancedTasks;
         } catch (error) {
             console.error("Error fetching manager tasks:", error);
+            setTasks([]);
+            return [];
         }
     };
 
@@ -89,7 +112,7 @@ export const ManagerTaskProvider = ({ children }) => {
           const errorMsg = error.response?.data?.message || 'Failed to add task';
           return { success: false, error: errorMsg };
       }
-  };
+    };
 
     const deleteTask = async (taskId) => {
         try {
@@ -169,11 +192,14 @@ export const ManagerTaskProvider = ({ children }) => {
     }, [isManagerLoggedIn, userData]);
 
     useEffect(() => {
-        if (selectedList) {
-            console.log('Selected list changed, fetching tasks');
-            fetchTasks(selectedList.id);
+        if (userData?.username && lists.length > 0) {
+            if (defaultView) {
+                fetchTasks();
+            } else if (selectedList) {
+                fetchTasks(selectedList.id);
+            }
         }
-    }, [selectedList]);
+    }, [defaultView, selectedList, lists]);
 
     return (
         <ManagerTaskContext.Provider value={{
@@ -191,9 +217,15 @@ export const ManagerTaskProvider = ({ children }) => {
             updateList,
             defaultView,
             setView,
-            setDefaultView,
+            setDefaultView, // Make sure this is exposed in the context
             userData,
             setTasks,
+            statusFilter,
+            setStatusFilter,
+            priorityFilter,
+            setPriorityFilter,
+            deadlineFilter,
+            setDeadlineFilter
         }}>
             {children}
         </ManagerTaskContext.Provider>

@@ -24,7 +24,11 @@ const Tasks = () => {
     addList, 
     deleteList, 
     updateList,
-    fetchTasks
+    fetchTasks,
+    priorityFilter,
+    setPriorityFilter,
+    statusFilter,
+    setStatusFilter
   } = useContext(TaskContext);
   
   const [newTask, setNewTask] = useState('');
@@ -35,6 +39,7 @@ const Tasks = () => {
   const [popupList, setPopupList] = useState(null);
   const [showToast, setShowToast] = useState(false);
   const [showTaskPopup, setShowTaskPopup] = useState(false);
+  const [deadlineFilter, setDeadlineFilter] = useState('all');
 
   const MAX_TITLE_LENGTH = 30;
 
@@ -91,7 +96,7 @@ const Tasks = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'username': userData.username // Send username in headers
+          'username': userData.username
         },
         body: JSON.stringify(updatedTask),
         credentials: 'include'
@@ -104,7 +109,6 @@ const Tasks = () => {
       
       const result = await response.json();
       
-      // Update local state
       setTasks(tasks.map(t => t.id === updatedTask.id ? result : t));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
@@ -126,7 +130,7 @@ const Tasks = () => {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'username': userData.username // Make sure userData is from your auth context
+            'username': userData.username
           },
           body: JSON.stringify({
             description: tempDescription
@@ -141,7 +145,6 @@ const Tasks = () => {
         
         const updatedTask = await response.json();
         
-        // Update local state
         setTaskDetails(tempDescription);
         setSelectedTask(updatedTask);
         setTasks(tasks.map(t => t.id === updatedTask.id ? updatedTask : t));
@@ -178,27 +181,23 @@ const Tasks = () => {
     }
   };
 
-  // Update the handleDeleteList function in Tasks.jsx
-const handleDeleteList = () => {
-  if (window.confirm(`Are you sure you want to delete the list "${popupList.name}"?`)) {
-    // Show a loading indicator or message
-    setShowToast(true);
-    
-    deleteList(popupList.id)
-      .then(() => {
-        setPopupVisible(false);
-        // Show success message
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
-      })
-      .catch((error) => {
-        console.error("Failed to delete list:", error);
-        // Show error message to user
-        alert(`Could not delete list "${popupList.name}". Please try again later.`);
-        setPopupVisible(false);
-      });
-  }
-};
+  const handleDeleteList = () => {
+    if (window.confirm(`Are you sure you want to delete the list "${popupList.name}"?`)) {
+      setShowToast(true);
+      
+      deleteList(popupList.id)
+        .then(() => {
+          setPopupVisible(false);
+          setShowToast(true);
+          setTimeout(() => setShowToast(false), 3000);
+        })
+        .catch((error) => {
+          console.error("Failed to delete list:", error);
+          alert(`Could not delete list "${popupList.name}". Please try again later.`);
+          setPopupVisible(false);
+        });
+    }
+  };
 
   const handleListClick = (list) => {
     setSelectedList(list);
@@ -222,6 +221,187 @@ const handleDeleteList = () => {
     ));
   };
 
+  const getFilteredTasks = () => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekEnd = new Date(today);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+
+    return tasks.filter(task => {
+      if (defaultView === 'deadline-filter') {
+        if (!task.deadline && deadlineFilter !== 'all') return false;
+        
+        const taskDate = task.deadline ? new Date(task.deadline) : null;
+        
+        switch (deadlineFilter) {
+          case 'today':
+            return taskDate && (
+              taskDate.getFullYear() === today.getFullYear() &&
+              taskDate.getMonth() === today.getMonth() &&
+              taskDate.getDate() === today.getDate()
+            );
+          case 'week':
+            return taskDate && taskDate >= today && taskDate <= weekEnd;
+          case 'overdue':
+            return taskDate && taskDate < today;
+          case 'all':
+          default:
+            break;
+        }
+      }
+
+      // Apply priority filter for Priority view
+      if (defaultView === 'priority-filter') {
+        if (priorityFilter !== 'all') {
+          const priorityValues = {
+            'none': 0,
+            'low': 1,
+            'medium': 2,
+            'high': 3
+          };
+          return task.priority === priorityValues[priorityFilter];
+        }
+      }
+
+      // Apply status filter for Status view
+      if (defaultView === 'status-filter') {
+        if (statusFilter !== 'all') {
+          return task.status === statusFilter;
+        }
+      }
+
+      // Default filter for specific lists
+      if (!defaultView && selectedList) {
+        return task.listId === selectedList.id;
+      }
+
+      return true;
+    });
+  };
+
+  const renderDeadlineFilterOptions = () => {
+    if (defaultView !== 'deadline-filter') return null;
+
+    return (
+      <div className="deadline-filter">
+        <button
+          className={`filter-button ${deadlineFilter === 'all' ? 'active' : ''}`}
+          onClick={() => setDeadlineFilter('all')}
+        >
+          All Tasks
+        </button>
+        <button
+          className={`filter-button ${deadlineFilter === 'today' ? 'active' : ''}`}
+          onClick={() => setDeadlineFilter('today')}
+        >
+          Due Today
+        </button>
+        <button
+          className={`filter-button ${deadlineFilter === 'week' ? 'active' : ''}`}
+          onClick={() => setDeadlineFilter('week')}
+        >
+          Due This Week
+        </button>
+        <button
+          className={`filter-button ${deadlineFilter === 'overdue' ? 'active' : ''}`}
+          onClick={() => setDeadlineFilter('overdue')}
+        >
+          Overdue
+        </button>
+      </div>
+    );
+  };
+
+  const renderPriorityFilterOptions = () => {
+    if (defaultView !== 'priority-filter') return null;
+
+    return (
+      <div className="priority-filter">
+        <button
+          className={`filter-button ${priorityFilter === 'all' ? 'active' : ''}`}
+          onClick={() => setPriorityFilter('all')}
+        >
+          All Tasks
+        </button>
+        <button
+          className={`filter-button priority-none ${priorityFilter === 'none' ? 'active' : ''}`}
+          onClick={() => setPriorityFilter('none')}
+        >
+          None
+        </button>
+        <button
+          className={`filter-button priority-low ${priorityFilter === 'low' ? 'active' : ''}`}
+          onClick={() => setPriorityFilter('low')}
+        >
+          Low
+        </button>
+        <button
+          className={`filter-button priority-medium ${priorityFilter === 'medium' ? 'active' : ''}`}
+          onClick={() => setPriorityFilter('medium')}
+        >
+          Medium
+        </button>
+        <button
+          className={`filter-button priority-high ${priorityFilter === 'high' ? 'active' : ''}`}
+          onClick={() => setPriorityFilter('high')}
+        >
+          High
+        </button>
+      </div>
+    );
+  };
+
+  const renderStatusFilterOptions = () => {
+    if (defaultView !== 'status-filter') return null;
+
+    return (
+      <div className="status-filter">
+        <button
+          className={`filter-button ${statusFilter === 'all' ? 'active' : ''}`}
+          onClick={() => setStatusFilter('all')}
+        >
+          All Tasks
+        </button>
+        <button
+          className={`filter-button status-pending ${statusFilter === 'pending' ? 'active' : ''}`}
+          onClick={() => setStatusFilter('none')}
+        >
+          Pending
+        </button>
+        <button
+          className={`filter-button status-inprogress ${statusFilter === 'inprogress' ? 'active' : ''}`}
+          onClick={() => setStatusFilter('inprogress')}
+        >
+          In Progress
+        </button>
+        <button
+          className={`filter-button status-completed ${statusFilter === 'completed' ? 'active' : ''}`}
+          onClick={() => setStatusFilter('completed')}
+        >
+          Completed
+        </button>
+      </div>
+    );
+  };
+
+  const handleDeadlineFilterClick = () => {
+    setView('deadline-filter');
+    setSelectedList(null);
+    setDeadlineFilter('all');
+  };
+
+  const handlePriorityFilterClick = () => {
+    setView('priority-filter');
+    setSelectedList(null);
+    setPriorityFilter('all');
+  };
+
+  const handleStatusFilterClick = () => {
+    setView('status-filter');
+    setSelectedList(null);
+    setStatusFilter('all');
+  };
+
   const getMainContent = () => {
     if (!selectedList && !defaultView) {
       return (
@@ -232,11 +412,20 @@ const handleDeleteList = () => {
       );
     }
     
-    const title = defaultView ? defaultView : (selectedList?.name || '');
+    const title = defaultView === 'deadline-filter' ? 'Filter By Deadline' : 
+                 defaultView === 'priority-filter' ? 'Filter By Priority' :
+                 defaultView === 'status-filter' ? 'Filter By Status' :
+                 selectedList?.name || '';
+    
+    const filteredTasks = getFilteredTasks();
 
     return (
       <div className="tasks-main">
         <h2 className='todays-tasks-title'>{title}</h2>
+        {defaultView === 'deadline-filter' && renderDeadlineFilterOptions()}
+        {defaultView === 'priority-filter' && renderPriorityFilterOptions()}
+        {defaultView === 'status-filter' && renderStatusFilterOptions()}
+        
         {selectedList && (
           <>
             <input
@@ -252,8 +441,9 @@ const handleDeleteList = () => {
             </button>
           </>
         )}
+        
         <div className="task-list">
-          {tasks.map((task) => (
+          {filteredTasks.map((task) => (
             <TaskItem
               key={task.id}
               task={{
@@ -323,43 +513,22 @@ const handleDeleteList = () => {
     <div className="tasks">
       <div className="tasks-sidebar">
         <div 
-          className={`tasks-sidebar-links ${defaultView === 'Today' ? 'active' : ''}`} 
-          onClick={() => {
-            const todayList = findListByName('Today');
-            if (todayList) {
-              setSelectedList(todayList);
-            } else {
-              setView('Today');
-            }
-          }}
+          className={`tasks-sidebar-links ${defaultView === 'deadline-filter' ? 'active' : ''}`} 
+          onClick={handleDeadlineFilterClick}
         >
-          Today
+          Deadline Filter
         </div>
         <div 
-          className={`tasks-sidebar-links ${defaultView === 'Next 7 Days' ? 'active' : ''}`} 
-          onClick={() => {
-            const next7List = findListByName('Next 7 Days');
-            if (next7List) {
-              setSelectedList(next7List);
-            } else {
-              setView('Next 7 Days');
-            }
-          }}
+          className={`tasks-sidebar-links ${defaultView === 'priority-filter' ? 'active' : ''}`} 
+          onClick={handlePriorityFilterClick}
         >
-          Next 7 Days
+          Priority Filter
         </div>
         <div 
-          className={`tasks-sidebar-links ${defaultView === 'Inbox' ? 'active' : ''}`} 
-          onClick={() => {
-            const inboxList = findListByName('Inbox');
-            if (inboxList) {
-              setSelectedList(inboxList);
-            } else {
-              setView('Inbox');
-            }
-          }}
+          className={`tasks-sidebar-links ${defaultView === 'status-filter' ? 'active' : ''}`} 
+          onClick={handleStatusFilterClick}
         >
-          Inbox
+          Status Filter
         </div>
         <hr />
         <div className='tasks-sidebar-links sidebar-lists'>
@@ -383,7 +552,7 @@ const handleDeleteList = () => {
             <button onClick={handleUpdateList}>Update</button>
             <button 
               onClick={handleDeleteList}
-              disabled={['Today', 'Next 7 Days', 'Inbox'].includes(popupList?.name)}
+              disabled={['deadline-filter', 'priority-filter', 'status-filter'].includes(popupList?.name)}
             >
               Delete
             </button>

@@ -274,3 +274,74 @@ body, html {
   90%  { opacity: 1; transform: translateX(0); }
   100% { opacity: 0; transform: translateX(50px); }
 }
+
+
+/* Add to your Tasks.css */
+.deadline-filter {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.filter-button {
+  padding: 5px 10px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.filter-button:hover {
+  background: #f5f5f5;
+}
+
+.filter-button.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+/* Add to your Tasks.css */
+.priority-filter, .status-filter {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  flex-wrap: wrap;
+}
+
+/* You can add specific colors for priority buttons */
+.filter-button.priority-none.active {
+  background-color: #f0f0f0;
+  color: #333;
+}
+.filter-button.priority-low.active {
+  background-color: #ffeb3b;
+  color: #000;
+}
+.filter-button.priority-medium.active {
+  background-color: #2196f3;
+  color: white;
+}
+.filter-button.priority-high.active {
+  background-color: #f44336;
+  color: white;
+}
+
+/* Status filter colors */
+.filter-button.status-pending.active {
+  background-color: #ff9800;
+  color: white;
+}
+.filter-button.status-inprogress.active {
+  background-color: #2196f3;
+  color: white;
+}
+.filter-button.status-completed.active {
+  background-color: #4caf50;
+  color: white;
+}

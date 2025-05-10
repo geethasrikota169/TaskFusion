@@ -48,7 +48,7 @@ body, html {
 .password-input {
   width: 300px;
   padding: 10px;
-  margin: 10px 0;
+  margin: 10px 20px;
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 1rem;
