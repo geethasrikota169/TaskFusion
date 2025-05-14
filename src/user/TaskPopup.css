@@ -101,3 +101,69 @@
   background: #f44336;
   color: white;
 }
+
+/* Add these to your existing TaskPopup.css */
+
+.priority-suggestion {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.suggest-btn {
+  padding: 6px 12px;
+  background-color: #4a6fa5;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.suggest-btn:hover {
+  background-color: #3a5a8f;
+}
+
+.suggest-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.suggestion-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.apply-suggestion-btn {
+  padding: 4px 8px;
+  background-color: #e0e0e0;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 13px;
+  margin:5px 7px;
+}
+
+.apply-suggestion-btn:hover {
+  background-color: #d0d0d0;
+}
+
+.ai-reasoning {
+  margin-top: 0px;
+  padding: 8px;
+  background-color: #f8f8f8;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #555;
+}
+.priority-reasoning {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 5px;
+  text-align: left;
+}

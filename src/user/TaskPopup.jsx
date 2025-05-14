@@ -6,6 +6,9 @@ const TaskPopup = ({ task, onClose, onUpdate, onDelete }) => {
   const [status, setStatus] = useState(task.status || 'none');
   const [priority, setPriority] = useState(task.priority || 0);
   const [deadline, setDeadline] = useState(task.deadline || '');
+  const [suggestedPriority, setSuggestedPriority] = useState(null);
+  const [isLoadingSuggestion, setIsLoadingSuggestion] = useState(false);
+  const [aiReasoning, setAiReasoning] = useState('');
 
   const priorityColors = [
     { value: 0, color: 'white', label: 'None' },
@@ -13,6 +16,11 @@ const TaskPopup = ({ task, onClose, onUpdate, onDelete }) => {
     { value: 2, color: 'blue', label: 'Medium' },
     { value: 3, color: 'red', label: 'High' }
   ];
+
+  const getPriorityLabel = (value) => {
+    const priority = priorityColors.find(p => p.value === value);
+    return priority ? priority.label : 'None';
+  };
 
   const handleSave = async () => {
     const updatePackage = {
@@ -29,6 +37,50 @@ const TaskPopup = ({ task, onClose, onUpdate, onDelete }) => {
       onClose();
     } catch (error) {
       console.error("Update failed:", error);
+    }
+  };
+
+  const fetchPrioritySuggestion = async () => {
+    setIsLoadingSuggestion(true);
+    setAiReasoning("Analyzing task...");
+    
+    try {
+      const response = await fetch('http://localhost:2002/api/ai/suggest-priority', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: title,
+          description: task.description || '',
+          deadline: deadline
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || errorData.message || 'Failed to get suggestion');
+      }
+      
+      const data = await response.json();
+      
+      if (data.status === "error") {
+        throw new Error(data.message);
+      }
+      
+      setSuggestedPriority(data.priority);
+      setAiReasoning(`Priority suggestion received from ${data.source || 'AI'}`);
+    } catch (error) {
+      console.error("Failed to get priority suggestion:", error);
+      setAiReasoning(`Using fallback priority system: ${error.message}`);
+      // You could also automatically apply the fallback here if you want
+    } finally {
+      setIsLoadingSuggestion(false);
+    }
+  };
+   const applySuggestion = () => {
+    if (suggestedPriority !== null) {
+      setPriority(suggestedPriority);
     }
   };
 
@@ -66,6 +118,33 @@ const TaskPopup = ({ task, onClose, onUpdate, onDelete }) => {
                 title={p.label}
               />
             ))}
+          </div>
+          
+          <div className="priority-suggestion">
+            <button 
+              onClick={fetchPrioritySuggestion}
+              disabled={isLoadingSuggestion}
+              className="suggest-btn"
+            >
+              {isLoadingSuggestion ? 'Analyzing...' : 'Suggest Priority'}
+            </button>
+            
+            {suggestedPriority !== null && (
+              <div className="suggestion-result">
+                <div className="suggestion-details">
+                  <span>Suggested: {getPriorityLabel(suggestedPriority)}</span>
+                  <button 
+                    onClick={applySuggestion}
+                    className="apply-suggestion-btn"
+                  >
+                    Apply
+                  </button>
+                </div>
+                <div className="ai-reasoning">
+                  {aiReasoning}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
