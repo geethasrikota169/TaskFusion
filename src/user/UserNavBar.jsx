@@ -14,8 +14,7 @@ import Pomodoro from './Pomodoro';
 import Tasks from './Tasks';
 import { TaskProvider } from './TaskContext';
 import TeamTasksPage from './TeamTasksPage';
-
-
+import CalendarView from './CalendarView';
 
 export default function UserNavBar() {
   const { setIsUserLoggedIn } = useAuth();
@@ -85,6 +84,7 @@ export default function UserNavBar() {
           <Route path="/pomodoro" element={<Pomodoro />} />
           <Route path="/usertasks" element={<Tasks />} />
           <Route path="/teamtasks" element={<TeamTasksPage />} />
+          <Route path="/calendar" element={<CalendarView />} />
         </Routes>
       </TaskProvider>
     </div>

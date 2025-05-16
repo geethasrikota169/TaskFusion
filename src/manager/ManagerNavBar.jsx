@@ -13,6 +13,7 @@ import Pomodoro from '../user/Pomodoro';
 import ManagerTasks from './ManagerTasks'; 
 import { ManagerTaskProvider } from './ManagerTaskContext';
 import TeamTasksPage from '../user/TeamTasksPage';
+import ManagerCalendarView from './ManagerCalendarView';
 
 export default function ManagerNavBar() {
   const { setIsManagerLoggedIn } = useAuth();
@@ -84,6 +85,7 @@ export default function ManagerNavBar() {
           <Route path="/pomodoro" element={<Pomodoro />} exact />
           <Route path="/manager-tasks" element={<ManagerTasks/>} />
           <Route path="/teamtasks" element={<TeamTasksPage/>} />
+          <Route path="/managercalendar" element={<ManagerCalendarView />} />
         </Routes>
       </ManagerTaskProvider>
     </div>

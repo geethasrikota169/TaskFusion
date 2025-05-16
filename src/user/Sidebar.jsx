@@ -21,9 +21,9 @@ const Sidebar = () => {
       <Link to="/teamtasks" className="sidebar-icon">
         <img src={Iteams} alt="Teams Icon" className="icon teams-icon-sidebar" />
       </Link>
-      <div className="sidebar-icon">
+      <Link to="/calendar" className="sidebar-icon">
         <img src={Icalendar} alt="Calendar Icon" className="icon calendar-icon-sidebar" />
-      </div>
+      </Link>
       <Link to="/pomodoro" className="sidebar-icon">
         <img src={Ipomodoro} alt="Pomodoro Icon" className="icon pomodoro-icon-sidebar" />
       </Link>

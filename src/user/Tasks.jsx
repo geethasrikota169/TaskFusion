@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { TaskContext } from './TaskContext';
 import TaskItem from './TaskItem';
-import TaskPopup from './Taskpopup';
+import TaskPopup from './TaskPopup';
 import './Tasks.css';
 import './TaskPopup.css';
 import addIcon from '../assets/icons/more.png';

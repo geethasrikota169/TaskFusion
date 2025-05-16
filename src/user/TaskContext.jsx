@@ -85,6 +85,31 @@ export const TaskProvider = ({ children }) => {
   }
 };
 
+const fetchAllTasks = async () => {
+  if (!userData?.username) return [];
+  
+  try {
+    const response = await axios.get(`${config.url}/tasks/all`, {
+      params: { username: userData.username }
+    });
+    
+    const enhancedTasks = response.data.map(task => {
+      const list = lists.find(l => l.id === task.listId);
+      return {
+        ...task,
+        listName: list?.name || 'Uncategorized'
+      };
+    });
+    
+    setTasks(enhancedTasks);
+    return enhancedTasks;
+  } catch (error) {
+    console.error("Error fetching all tasks:", error);
+    setTasks([]);
+    return [];
+  }
+};
+
   const addTask = async (task) => {
     try {
       console.log("Adding task with data:", {
@@ -261,6 +286,28 @@ const deleteList = async (listId) => {
     }
   }, [selectedList]);
 
+  useEffect(() => {
+  if (!userData?.username) return;
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      await fetchLists();
+      
+      // Only fetch tasks if we're not in a default view
+      if (!defaultView && selectedList) {
+        await fetchTasks(selectedList.id);
+      }
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadData();
+}, [userData?.username]);
+
   return (
     <TaskContext.Provider value={{ 
       tasks,
@@ -281,7 +328,8 @@ const deleteList = async (listId) => {
       priorityFilter,
       setPriorityFilter,
       statusFilter,
-      setStatusFilter
+      setStatusFilter,
+      fetchAllTasks,
     }}>
       {children}
     </TaskContext.Provider>
