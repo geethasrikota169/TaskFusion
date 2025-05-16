@@ -27,9 +27,9 @@ const Sidebar = () => {
       <Link to="/pomodoro" className="sidebar-icon">
         <img src={Ipomodoro} alt="Pomodoro Icon" className="icon pomodoro-icon-sidebar" />
       </Link>
-      <div className="sidebar-icon">
+      <Link to="/searchpage" className="sidebar-icon">
         <img src={Isearch} alt="Search Icon" className="icon search-icon-sidebar" />
-      </div>
+      </Link>
       <div className="sidebar-icon">
         <img src={Ibin} alt="Trash Icon" className="icon trash-icon-sidebar" />
       </div>

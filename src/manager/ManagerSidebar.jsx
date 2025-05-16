@@ -27,9 +27,9 @@ const ManagerSidebar = () => {
       <Link to="/pomodoro" className="m-sidebar-icon">
         <img src={Ipomodoro} alt="Pomodoro Icon" className="m-icon m-pomodoro-icon-sidebar" />
       </Link>
-      <div className="m-sidebar-icon">
+      <Link to="/managersearchpage" className="m-sidebar-icon">
         <img src={Isearch} alt="Search Icon" className="m-icon m-search-icon-sidebar" />
-      </div>
+      </Link>
       <div className="m-sidebar-icon">
         <img src={Ibin} alt="Trash Icon" className="m-icon m-trash-icon-sidebar" />
       </div>

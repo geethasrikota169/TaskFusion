@@ -103,35 +103,28 @@ export const ManagerTaskProvider = ({ children }) => {
             return [];
         }
     };
-
-    // Add fetchAllTasks function specifically for calendar view
+    
     const fetchAllTasks = async () => {
-        if (!userData?.username || !isManagerLoggedIn) {
-            console.log('Cannot fetch all tasks - no username or not logged in as manager');
-            return [];
-        }
+        if (!userData?.username || !isManagerLoggedIn) return [];
         
         try {
-            console.log('Fetching all tasks for manager (calendar view)');
             const response = await axios.get(`${config.url}/manager/tasks/all`, {
                 params: { username: userData.username }
             });
-            
-            console.log('All tasks response:', response.data);
             
             const enhancedTasks = response.data.map(task => {
                 const list = lists.find(l => l.id === task.listId);
                 return {
                     ...task,
-                    listName: list?.name || 'Uncategorized'
+                    listName: list?.name || 'Uncategorized',
+                    list: list
                 };
             });
             
-            // Don't set tasks state here to avoid interfering with current view
+            setTasks(enhancedTasks);
             return enhancedTasks;
         } catch (error) {
             console.error("Error fetching all manager tasks:", error);
-            console.error("Error details:", error.response?.data);
             return [];
         }
     };
@@ -269,6 +262,12 @@ export const ManagerTaskProvider = ({ children }) => {
             }
         }
     }, [defaultView, selectedList, lists.length, isManagerLoggedIn, userData?.username]);
+    
+    useEffect(() => {
+        if (lists.length > 0 && !selectedList && !defaultView) {
+            fetchAllTasks();
+        }
+    }, [lists]);
 
     return (
         <ManagerTaskContext.Provider value={{

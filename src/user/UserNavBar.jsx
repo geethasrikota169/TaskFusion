@@ -15,6 +15,7 @@ import Tasks from './Tasks';
 import { TaskProvider } from './TaskContext';
 import TeamTasksPage from './TeamTasksPage';
 import CalendarView from './CalendarView';
+import SearchPage from './SearchPage';
 
 export default function UserNavBar() {
   const { setIsUserLoggedIn } = useAuth();
@@ -85,6 +86,7 @@ export default function UserNavBar() {
           <Route path="/usertasks" element={<Tasks />} />
           <Route path="/teamtasks" element={<TeamTasksPage />} />
           <Route path="/calendar" element={<CalendarView />} />
+          <Route path="/searchpage" element={<SearchPage />} />
         </Routes>
       </TaskProvider>
     </div>

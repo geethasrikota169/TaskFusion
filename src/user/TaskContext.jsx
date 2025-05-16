@@ -97,7 +97,8 @@ const fetchAllTasks = async () => {
       const list = lists.find(l => l.id === task.listId);
       return {
         ...task,
-        listName: list?.name || 'Uncategorized'
+        listName: list?.name || 'Uncategorized',
+        list: list // Add the full list object to each task
       };
     });
     
@@ -263,6 +264,12 @@ const deleteList = async (listId) => {
     setDefaultView(view);
     setSelectedList(null);
   };
+
+  useEffect(() => {
+    if (lists.length > 0 && !selectedList && !defaultView) {
+      fetchAllTasks();
+    }
+  }, [lists]);
 
   useEffect(() => {
     if (userData?.username) {

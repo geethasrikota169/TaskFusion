@@ -14,6 +14,7 @@ import ManagerTasks from './ManagerTasks';
 import { ManagerTaskProvider } from './ManagerTaskContext';
 import TeamTasksPage from '../user/TeamTasksPage';
 import ManagerCalendarView from './ManagerCalendarView';
+import ManagerSearchPage from './ManagerSearchPage';
 
 export default function ManagerNavBar() {
   const { setIsManagerLoggedIn } = useAuth();
@@ -86,6 +87,7 @@ export default function ManagerNavBar() {
           <Route path="/manager-tasks" element={<ManagerTasks/>} />
           <Route path="/teamtasks" element={<TeamTasksPage/>} />
           <Route path="/managercalendar" element={<ManagerCalendarView />} />
+          <Route path="/managersearchpage" element={<ManagerSearchPage />} />
         </Routes>
       </ManagerTaskProvider>
     </div>
