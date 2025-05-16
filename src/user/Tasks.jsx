@@ -40,6 +40,10 @@ const Tasks = () => {
   const [showToast, setShowToast] = useState(false);
   const [showTaskPopup, setShowTaskPopup] = useState(false);
   const [deadlineFilter, setDeadlineFilter] = useState('all');
+  const [showListModal, setShowListModal] = useState(false);
+  const [listModalMode, setListModalMode] = useState('add'); 
+  const [currentListName, setCurrentListName] = useState('');
+  const [listToEdit, setListToEdit] = useState(null);
 
   const MAX_TITLE_LENGTH = 30;
 
@@ -162,10 +166,9 @@ const Tasks = () => {
   };
 
   const handleAddList = () => {
-    const listName = prompt('Enter the name of the new list:');
-    if (listName && listName.trim()) {
-      addList({ name: listName.trim() });
-    }
+    setListModalMode('add');
+    setCurrentListName('');
+    setShowListModal(true);
   };
 
   const handleListDoubleClick = (list) => {
@@ -174,11 +177,11 @@ const Tasks = () => {
   };
 
   const handleUpdateList = () => {
-    const newListName = prompt('Enter the new name of the list:', popupList.name);
-    if (newListName && newListName.trim()) {
-      updateList(popupList.id, { ...popupList, name: newListName.trim() });
-      setPopupVisible(false);
-    }
+    setListModalMode('edit');
+    setListToEdit(popupList);
+    setCurrentListName(popupList.name);
+    setPopupVisible(false);
+    setShowListModal(true);
   };
 
   const handleDeleteList = () => {
@@ -402,6 +405,49 @@ const Tasks = () => {
     setStatusFilter('all');
   };
 
+  const ListModal = () => (
+    <div className="list-modal-overlay">
+      <div className="list-modal-content">
+        <h3>{listModalMode === 'add' ? 'Add New List' : 'Edit List Name'}</h3>
+        <input
+          type="text"
+          value={currentListName}
+          onChange={(e) => setCurrentListName(e.target.value)}
+          placeholder="Enter list name"
+          className="list-modal-input"
+          autoFocus
+        />
+        <div className="list-modal-buttons">
+          <button 
+            onClick={() => {
+              if (currentListName.trim()) {
+                if (listModalMode === 'add') {
+                  addList({ name: currentListName.trim() });
+                } else {
+                  updateList(listToEdit.id, { ...listToEdit, name: currentListName.trim() });
+                }
+                setShowListModal(false);
+                setCurrentListName('');
+              }
+            }}
+            className="list-modal-confirm"
+          >
+            {listModalMode === 'add' ? 'Add' : 'Update'}
+          </button>
+          <button 
+            onClick={() => {
+              setShowListModal(false);
+              setCurrentListName('');
+            }}
+            className="list-modal-cancel"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   const getMainContent = () => {
     if (!selectedList && !defaultView) {
       return (
@@ -575,6 +621,8 @@ const Tasks = () => {
           Saved
         </div>
       )}
+
+      {showListModal && <ListModal />}
     </div>
   );
 };
