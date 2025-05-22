@@ -1,5 +1,5 @@
 // src/components/TaskContext.js
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect,useCallback,useRef } from 'react';
 import axios from 'axios';
 import config from '../config';
 import { useAuth } from '../contextapi/AuthContext';
@@ -15,6 +15,7 @@ export const TaskProvider = ({ children }) => {
   const [defaultView, setDefaultView] = useState(null); 
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const hasAutoSelectedList = useRef(false);
 
   const fetchLists = async () => {
     console.log('Fetching lists for user:', userData?.username);
@@ -36,10 +37,16 @@ export const TaskProvider = ({ children }) => {
       
       setLists(serverLists);
       
-      // Auto-select the first list if none selected
-      if (serverLists.length > 0 && !selectedList) {
+      // Only auto-select the first list ONCE per login/session
+      if (
+        serverLists.length > 0 &&
+        !selectedList &&
+        !defaultView &&
+        !hasAutoSelectedList.current
+      ) {
         const inboxList = serverLists.find(list => list.name === 'Inbox') || serverLists[0];
         setSelectedList(inboxList);
+        hasAutoSelectedList.current = true;
       }
       
       setLoading(false);
@@ -85,7 +92,7 @@ export const TaskProvider = ({ children }) => {
   }
 };
 
-const fetchAllTasks = async () => {
+const fetchAllTasks = useCallback(async () => {
   if (!userData?.username) return [];
   
   try {
@@ -98,7 +105,7 @@ const fetchAllTasks = async () => {
       return {
         ...task,
         listName: list?.name || 'Uncategorized',
-        list: list // Add the full list object to each task
+        list: list
       };
     });
     
@@ -109,7 +116,7 @@ const fetchAllTasks = async () => {
     setTasks([]);
     return [];
   }
-};
+}, [userData?.username, lists]);
 
   const addTask = async (task) => {
     try {
@@ -270,13 +277,16 @@ const deleteList = async (listId) => {
       fetchAllTasks();
     }
   }, [lists]);
+  useEffect(() => {
+    hasAutoSelectedList.current = false;
+  }, [userData?.username]);
 
   useEffect(() => {
     if (userData?.username) {
       fetchLists();
     }
   }, [userData]);
-
+  
   useEffect(() => {
   if (userData?.username && lists.length > 0) {
     if (defaultView) { 
@@ -285,7 +295,8 @@ const deleteList = async (listId) => {
       fetchTasks(selectedList.id); 
     }
   }
-}, [defaultView, selectedList, lists]);
+}, [defaultView, selectedList]);
+
   useEffect(() => {
     if (selectedList) {
       fetchTasks(selectedList.id);
@@ -301,7 +312,6 @@ const deleteList = async (listId) => {
       setLoading(true);
       await fetchLists();
       
-      // Only fetch tasks if we're not in a default view
       if (!defaultView && selectedList) {
         await fetchTasks(selectedList.id);
       }

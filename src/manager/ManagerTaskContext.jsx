@@ -1,7 +1,8 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect,useCallback } from 'react';
 import axios from 'axios';
 import config from '../config';
 import { useAuth } from '../contextapi/AuthContext';
+import { useRef } from 'react';
 
 export const ManagerTaskContext = createContext();
 
@@ -16,6 +17,7 @@ export const ManagerTaskProvider = ({ children }) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [deadlineFilter, setDeadlineFilter] = useState('all');
+  const hasAutoSelectedList = useRef(false);
 
   const setView = (view) => {
     console.log(`Setting view to: ${view}`);
@@ -40,11 +42,16 @@ export const ManagerTaskProvider = ({ children }) => {
       console.log('Manager lists response:', response.data);
       const serverLists = Array.isArray(response.data) ? response.data : [];
       setLists(serverLists);
-
-      if (serverLists.length > 0 && !selectedList && !defaultView) {
+      if (
+        serverLists.length > 0 &&
+        !selectedList &&
+        !defaultView &&
+        !hasAutoSelectedList.current
+      ) {
         console.log('Auto-selecting first list');
         const inboxList = serverLists.find(list => list.name === 'Inbox') || serverLists[0];
         setSelectedList(inboxList);
+        hasAutoSelectedList.current = true;
       }
 
       setLoading(false);
@@ -104,7 +111,7 @@ export const ManagerTaskProvider = ({ children }) => {
     }
   };
 
-  const fetchAllTasks = async () => {
+  const fetchAllTasks = useCallback(async () => {
     if (!userData?.username || !isManagerLoggedIn) return [];
 
     try {
@@ -127,7 +134,7 @@ export const ManagerTaskProvider = ({ children }) => {
       console.error("Error fetching all manager tasks:", error);
       return [];
     }
-  };
+  }, [userData?.username, lists]);
 
   const addTask = async (task) => {
     try {
@@ -259,13 +266,18 @@ export const ManagerTaskProvider = ({ children }) => {
         fetchTasks(selectedList.id);
       }
     }
-  }, [defaultView, selectedList, lists.length, isManagerLoggedIn, userData?.username]);
+  }, [defaultView, selectedList, isManagerLoggedIn, userData?.username]);
 
   useEffect(() => {
     if (lists.length > 0 && !selectedList && !defaultView) {
       fetchAllTasks();
     }
   }, [lists]);
+
+  useEffect(() => {
+    hasAutoSelectedList.current = false;
+  }, [userData?.username, isManagerLoggedIn]);
+
 
   return (
     <ManagerTaskContext.Provider value={{
