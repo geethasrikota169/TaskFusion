@@ -6,6 +6,7 @@ import './Tasks.css';
 import './TaskPopup.css';
 import addIcon from '../assets/icons/more.png';
 import { useAuth } from '../contextapi/AuthContext';
+import config from '../config';
 
 const Tasks = () => {
   const { userData } = useAuth();
@@ -96,7 +97,7 @@ const Tasks = () => {
     }
   
     try {
-      const response = await fetch(`http://localhost:2002/tasks/${updatedTask.id}/metadata`, {
+      const response = await fetch(`${config.url}/tasks/${updatedTask.id}/metadata`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -130,7 +131,7 @@ const Tasks = () => {
   const saveDescription = async () => {
     if (selectedTask && tempDescription !== taskDetails) {
       try {
-        const response = await fetch(`http://localhost:2002/tasks/${selectedTask.id}/description`, {
+        const response = await fetch(`${config.url}/tasks/${selectedTask.id}/description`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

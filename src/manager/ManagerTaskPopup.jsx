@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../user/TaskPopup.css';
+import config from '../config';
 
 const ManagerTaskPopup = ({ task, onClose, onUpdate, onDelete }) => {
   const [title, setTitle] = useState(task.title);
@@ -44,7 +45,7 @@ const ManagerTaskPopup = ({ task, onClose, onUpdate, onDelete }) => {
     setAiReasoning("Analyzing task...");
     
     try {
-      const response = await fetch('http://localhost:2002/api/ai/suggest-priority', {
+      const response = await fetch(`${config.url}/api/ai/suggest-priority`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
