@@ -60,7 +60,7 @@ export default function UserLogin() {
     <div className="login-page">
       <div className="login-card">
         <div className="login-left">
-          <h1 className="login-title">User Login</h1>
+          <h1 className="login-title">User Login v2</h1>
           
           {error && (
             <div className="error-message" style={{ 
