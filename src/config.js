@@ -1,4 +1,5 @@
 const config = {
-    "url": process.env.REACT_APP_BACKEND_URL || "http://localhost:8082"
+    // Vite uses import.meta.env instead of process.env
+    "url": import.meta.env.VITE_BACKEND_URL || "http://localhost:8082"
 }
 export default config;
